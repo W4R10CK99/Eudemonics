@@ -37,7 +37,7 @@ The OCR Attribute Finder project combines Tesseract OCR with OpenAI's GPT-3.5-tu
    This will use Tesseract OCR to extract text from the image and then send a user message to OpenAI's GPT-3.5-turbo model to find attributes and values in the extracted        text.
 2. Adjust the page segmentation mode in the script as needed. The default mode is set to 6.
 
-## Contibuting
+## Contributing
 
 If you would like to contribute to this project, follow these steps:
 
