@@ -23,8 +23,8 @@ import cv2
 
 myconfig = r"--psm 6 --oem 3"
 
-# text = pytesseract.image_to_string(PIL.Image.open('img1.png'),config=myconfig)
-# print(text)
+text = pytesseract.image_to_string(PIL.Image.open('img1.png'),config=myconfig)
+print(text)
 
 # img = cv2.imread('2.JPEG')
 
