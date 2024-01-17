@@ -19,11 +19,11 @@ O Orientation and script detection (OSD) only
 import pytesseract
 import PIL.Image
 from openai import OpenAI
-import os
+import json
 
 myconfig = r"--psm 6 --oem 3"
 
-text = pytesseract.image_to_string(PIL.Image.open('img1.png'),config=myconfig)
+text = pytesseract.image_to_string(PIL.Image.open('perspective.jpeg'),config=myconfig)
 
 client = OpenAI()
 user_message = {
@@ -36,4 +36,32 @@ response = client.chat.completions.create(
         max_tokens=1000
     )
 
-print(response.choices[0].message.content)
+text = response.choices[0].message.content
+print(text)
+
+# interest_keys = [
+#     "Barcode",
+#     "Model",
+#     "Serial No.",
+#     "Manufacturer",
+#     "Date of installation/Manufacturer",
+#     "Unit of measurement",
+#     "Capacity",
+#     "Electrical Input KW",
+#     "Warranty End Date",
+#     "Refrigerant",
+#     "Refrigerant Qty",
+# ]
+
+# # Split the text into lines and filter specific key-value pairs
+# key_value_pairs = [line.split(':') for line in text.split('\n') if ':' in line]
+# filtered_data_dict = {
+#     key.strip().lower(): value.strip() for key, value in key_value_pairs if key.strip().lower() in map(str.lower, interest_keys)
+# }
+
+# # Convert the filtered dictionary to JSON format
+# json_data = json.dumps(filtered_data_dict, indent=2)
+
+# # Save the JSON data to a file
+# with open('output.json', 'w') as json_file:
+#     json_file.write(json_data)
