@@ -4,13 +4,12 @@ from openai import OpenAI
 import json
 
 # Replace 'your_api_key_here' with your actual OpenAI API key
-api_key = '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'
 myconfig = r"--psm 6 --oem 3"
 
 text = pytesseract.image_to_string(PIL.Image.open('perspective.jpeg'), config=myconfig)
 
 # Initialize OpenAI client with the API key
-client = OpenAI(api_key=api_key)
+client = OpenAI()
 
 user_message = {
     "role": "user",

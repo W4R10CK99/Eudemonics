@@ -1,0 +1,34 @@
+Attributes and values found in the text:
+
+- Model: GPC1460H41EC
+- Serial No.: 1609315090
+- AC Volts: 206/230
+- Phase: 1
+- Hertz: 60
+- Conductors: Copper
+- Voltage Range: Max 263, Min 1497
+- Min Circuit Amps: 8,49
+- Compressor: 
+   - LA: 26.4
+   - LAA: 134
+   - Fuse Max Amps: 60
+- Cond Motor: 
+   - FLA: 1.4
+   - HP: 1/4
+   - Charge: 103 07
+   - RA10A
+- Blower Motor: 
+   - FLA: 6.4
+   - HP: 3/4
+- Factory Test Pressure: 
+   - PSIG Low Side: 236
+   - High Side: 450
+- Maximum HACR Amps: 60
+- Part No.: 9140004316
+- Circuit Breaker
+- Suitable for outdoor use only
+- Heat Kits: 
+   - Rated at 240 VAC/1 PH/60 Hertz
+- Permanent identification required on plate when installing accessory heat kits
+- 0" Clearance to combustible surface
+- Outlet Air Temperature
