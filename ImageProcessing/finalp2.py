@@ -6,14 +6,14 @@ import json
 # Replace 'your_api_key_here' with your actual OpenAI API key
 myconfig = r"--psm 6 --oem 3"
 
-text = pytesseract.image_to_string(PIL.Image.open('perspective.jpeg'), config=myconfig)
+text = pytesseract.image_to_string(PIL.Image.open('ImageProcessing\check3\Img.JPEG'), config=myconfig)
 
 # Initialize OpenAI client with the API key
 client = OpenAI()
 
 user_message = {
     "role": "user",
-    "content": "from the text find attributes and their values in format attribute : value " + "\"" + text + " \"",
+    "content": "from the text find attributes and their values in json format " + "\"" + text + " \"",
 }
 
 response = client.chat.completions.create(

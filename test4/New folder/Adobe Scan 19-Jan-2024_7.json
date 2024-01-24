@@ -1,0 +1,19 @@
+{
+  "split_type_air_conditioner": {
+    "outdoor": "KaIiA",
+    "power_source": "220-240V~ 50Hz, 1Ph",
+    "excessive_operating": "4. IMPa",
+    "pressure_suction": "1 MPa",
+    "maximum_allowable_pressure": "449MPa",
+    "refrigerant": "R32/1 26kg",
+    "rated_current": "15.5A",
+    "rated_input": "3600W",
+    "climate_class": "",
+    "outdoor_unit": "SPLASH PROOE aN\n\nL» GMA-509487-EA",
+    "made_in": "China",
+    "circuit_breaker": "20A",
+    "installation_instructions": "",
+    "outdoor_noise_level": "65dB(A)",
+    "consult_supplier_before_installation": ""
+  }
+}

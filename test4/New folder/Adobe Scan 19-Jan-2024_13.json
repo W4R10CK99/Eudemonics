@@ -1,0 +1,20 @@
+{
+  "Brand": "FANTECH",
+  "Model": "CE284D",
+  "Motor": "test throttle te",
+  "EMC Voltage": "240V 1Ph 50Hz",
+  "Power": "0.09 kW",
+  "FLA": "0.4",
+  "RPS": "23",
+  "Country": {
+    "Australia": {
+      "Location": "Fantech Pty Ltd",
+      "Phone": "(03) 9554 7345"
+    },
+    "New Zealand": {
+      "Location": "Fantecl) Ltd",
+      "Phone": "(9%) 444 8248"
+    }
+  },
+  "Website": "fantech.com.au"
+}

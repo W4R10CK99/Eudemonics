@@ -1,0 +1,15 @@
+{
+  "Manufacturer": "Johnson Control",
+  "Model": "RAC-E60YHA",
+  "Serial Number": "1882483827",
+  "Operation Mode": ["Cooling", "Heating"],
+  "Total Input (Max)": {
+    "Cooling": "T800W (2600)",
+    "Heating": "1830 (2650)"
+  },
+  "Total Current (Max)": {
+    "Cooling": "8.30-7.60A (12.0A)",
+    "Heating": "8.40-7.74A (12.0A)"
+  },
+  "Made In": "Malaysia"
+}
