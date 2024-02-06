@@ -32,7 +32,7 @@ def gptText(ocrTXT):
 def predicted_AssetType(txt):
     model_nbr_variations = ['ModelNbr', 'model', 'modelno', 'model no', 'MODEL', 'MODEL NO']
     manufacturer_variations = ['Manufacturer', 'manufacturer', 'make']
-    serial_no_variations = ['SerialNo', 'serial', 'serialnumber', 'serialno']
+    serial_no_variations = ['SerialNo', 'serial', 'serialnumber', 'serialno','Serial No.']
 
     # Convert the text to a JSON object
     json_data
