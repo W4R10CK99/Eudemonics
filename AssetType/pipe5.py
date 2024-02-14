@@ -8,7 +8,10 @@ from fuzzywuzzy import fuzz
 
 
 myconfig = r"--psm 6 --oem 3"
-client = OpenAI()
+api_key = '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'
+client = OpenAI(api_key=api_key)
+
+pytesseract.pytesseract.tesseract_cmd = r'D:\\Tech_Upgrade_Project\\AI\\OCR\\tesseract.exe'
 
 # loading all globals
 
@@ -164,7 +167,7 @@ def predicted_AssetType(Manufact, model):
     y_actual = LE_Asset.inverse_transform(y_pred_encoded)
     
 
-    return y_actual
+    return y_actual[0]
 
 
 def textProcess(txt):
