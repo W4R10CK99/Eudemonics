@@ -84,7 +84,7 @@ def gptText(ocrTXT):
 # Read CSV file and find the most similar value
 def find_most_similar_value(variable, original_values):
     if not original_values.any():
-        return 'UNKNOWN'
+        return 'UNKNOWN','UNKNOWN'
 
     if variable and len(variable.split()) > 0:
         variable = variable.split()[0]
@@ -103,12 +103,12 @@ def find_most_similar_value(variable, original_values):
 
     if similarities[max_similarity_index] < 0.5:  # Adjust the threshold as needed
         # If not desirable, return the original value
-        return 'UNKNOWN'
+        return 'UNKNOWN',variable
 
     # Get the most similar value from the original values
     most_similar_value = original_values[max_similarity_index]
 
-    return most_similar_value
+    return most_similar_value,variable
 
 
 # ---> getting gpt generated text and processing it to find assetType
@@ -194,8 +194,8 @@ def textProcess(txt):
             model_nbr = json_data[variation]
             if model_nbr is not None:
                 model_nbr = model_nbr.upper()
-            model_nbr_matched= find_most_similar_value(model_nbr,existing_model)
-            json_data["Model"]=model_nbr_matched
+            model_nbr_matched,original_model= find_most_similar_value(model_nbr,existing_model)
+            json_data["Model"]=original_model
             break
 
     for variation in manufacturer_variations:
@@ -205,11 +205,11 @@ def textProcess(txt):
                 manufacturer = manufacturer.upper()
                 
             #now match the manufacturer to a valid manufacturer
-            manufacturer_matched= find_most_similar_value(manufacturer,existing_manufacturer)
-            json_data["Manufacturer"] = manufacturer_matched
+            manufacturer_matched,original_manufact= find_most_similar_value(manufacturer,existing_manufacturer)
+            json_data["Manufacturer"] = original_manufact
             break
 
-    return json.dumps(json_data)       
+    return json.dumps(json_data),manufacturer_matched,model_nbr_matched      
 
 
 
@@ -234,10 +234,10 @@ if __name__ == "__main__":
     result = process_image(image_path)
 
     # this function takes extracted json formatted text and checks for variation of attributes model, manufacturer
-    result2 = textProcess(result)
+    result2,manufacturer_matched,model_nbr_matched = textProcess(result)
 
     parsed_data=json.loads(result2)
 
     #finally assetType is predicted
-    parsed_data['AssetType'] = predicted_AssetType(parsed_data["Manufacturer"],parsed_data["Model"])
+    parsed_data['AssetType'] = predicted_AssetType(manufacturer_matched,model_nbr_matched)
     print(parsed_data)
