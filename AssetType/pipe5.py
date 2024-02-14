@@ -8,10 +8,8 @@ from fuzzywuzzy import fuzz
 
 
 myconfig = r"--psm 6 --oem 3"
-api_key = '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'
-client = OpenAI(api_key=api_key)
+client = OpenAI()
 
-pytesseract.pytesseract.tesseract_cmd = r'D:\\Tech_Upgrade_Project\\AI\\OCR\\tesseract.exe'
 
 # loading all globals
 
