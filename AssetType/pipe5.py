@@ -26,10 +26,47 @@ existing_manufacturer = LE_Manufact.inverse_transform(range(len(LE_Manufact.clas
 existing_model = LE_ModelNbr.inverse_transform(range(len(LE_ModelNbr.classes_)))
 
 
+def confidence(json_text, lines, confs):
+    # Load JSON text into a Python dictionary
+    # Convert the text to a JSON object
+    data = {}
+
+    # Assuming txt is some variable containing the JSON string
+    try:
+        data = json.loads(json_text)
+        # Continue with processing json_data
+    except json.decoder.JSONDecodeError:
+        pass 
+
+    # Create an array to store confidence scores
+    word_confidences = {}
+    confidence_scores = []
+
+    # Iterate over values in the JSON data (ignoring keys)
+    for value in data.values():
+        # Skip the value if it is not a string
+        if not isinstance(value, str):
+            continue
+
+        # Initialize confidence score for the value
+        value_confidence = 0
+
+        # Iterate over lines to find the exact value and calculate confidence
+        for line, conf in zip(lines, confs):
+            if line['text'] is not None and isinstance(line['text'], str) and value.lower() in line['text'].lower():
+                value_confidence = conf
+                break
+
+        # Append the confidence score to the array
+        if(value_confidence>0):
+            confidence_scores.append(value_confidence)
+            value_str = json.dumps(value)
+            word_confidences[value_str] = value_confidence
+
+
+    return confidence_scores, word_confidences
 
 #----------------------------------------------------------------------------------------------------
-
-
 
 def extract_text_from_image(image_path):
     img = Image.open(image_path)
@@ -195,6 +232,7 @@ def textProcess(txt):
             if model_nbr is not None:
                 model_nbr = model_nbr.upper()
             model_nbr_matched,original_model= find_most_similar_value(model_nbr,existing_model)
+            del json_data[variation]
             json_data["Model"]=original_model
             break
 
@@ -206,7 +244,8 @@ def textProcess(txt):
                 
             #now match the manufacturer to a valid manufacturer
             manufacturer_matched,original_manufact= find_most_similar_value(manufacturer,existing_manufacturer)
-            json_data["Manufacturer"] = original_manufact
+            del json_data[variation]
+            json_data["Manufacturer"] = manufacturer_matched
             break
 
     return json.dumps(json_data),manufacturer_matched,model_nbr_matched      
@@ -222,7 +261,7 @@ def process_image(image_path):
 
     extracted_json = gptText(extracted_text)
 
-    return extracted_json
+    return extracted_json, lines, confs
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -231,13 +270,23 @@ if __name__ == "__main__":
     image_path = sys.argv[1] 
 
     # this function takes stream , converting it to image and then extracting text 
-    result = process_image(image_path)
+    result, lines, confs = process_image(image_path)
+
+    confidence_score, word_confidences = confidence(result,lines,confs)
+    min_confidence = min(confidence_score)
+
 
     # this function takes extracted json formatted text and checks for variation of attributes model, manufacturer
     result2,manufacturer_matched,model_nbr_matched = textProcess(result)
 
     parsed_data=json.loads(result2)
 
-    #finally assetType is predicted
-    parsed_data['AssetType'] = predicted_AssetType(manufacturer_matched,model_nbr_matched)
+    print(word_confidences)
+
+    if(min_confidence < 20):
+        parsed_data['AssetType'] = ""
+    
+    else:
+        #finally assetType is predicted
+        parsed_data['AssetType'] = predicted_AssetType(manufacturer_matched,model_nbr_matched)
     print(parsed_data)
