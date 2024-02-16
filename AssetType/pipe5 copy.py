@@ -37,7 +37,6 @@ def confidence(json_text, lines, confs):
 
     # Create an array to store confidence scores
     word_confidences = {}
-    confidence_scores = []
 
     # Iterate over values in the JSON data (ignoring keys)
     for value in data.values():
@@ -56,12 +55,11 @@ def confidence(json_text, lines, confs):
 
         # Append the confidence score to the array
         if(value_confidence>0):
-            confidence_scores.append(value_confidence)
             value_str = json.dumps(value)
             word_confidences[value_str] = value_confidence
 
 
-    return confidence_scores, word_confidences
+    return word_confidences
 
 #----------------------------------------------------------------------------------------------------
 
@@ -317,26 +315,20 @@ if __name__ == "__main__":
 
     # this function takes stream , converting it to image and then extracting text 
     result, lines, confs = process_image(image_path)
-
+    word_confidences = confidence(result,lines,confs)
     print(result)
-
-    confidence_score, word_confidences = confidence(result,lines,confs)
-    min_confidence=0
-    if confidence_score:
-        min_confidence = min(confidence_score)
-
-
+    print(word_confidences)
     # this function takes extracted json formatted text and checks for variation of attributes model, manufacturer
     result2,serial_matched,manufacturer_matched,model_nbr_matched = textProcess(result)
 
-    print(serial_matched)
-    print(manufacturer_matched)
-    print(model_nbr_matched)
-
     parsed_data=json.loads(result2)
+    result = json.loads(result)
+    # Get the confidence scores for "Serial," "Manufacturer," and "Model"
+    serial_confidence = word_confidences.get(f'"{result["Serial"]}"', 0)
+    manufacturer_confidence = word_confidences.get(f'"{result["Manufacturer"]}"', 0)
+    model_confidence = word_confidences.get(f'"{result["Model"]}"', 0)
 
-    print(word_confidences)
-
+    min_confidence = min(serial_confidence, manufacturer_confidence, model_confidence)
     if(min_confidence < 20):
         parsed_data['AssetType'] = ""
     
