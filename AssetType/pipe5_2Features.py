@@ -17,15 +17,13 @@ client = OpenAI()
 # existing_model = pd.read_csv('models.csv')
 
 # OE_X = joblib.load('OE_X')
-LE_Serial = joblib.load('encoders/LE_SERIAL')
-LE_Asset = joblib.load('encoders/LE_ASSET')
-LE_ModelNbr = joblib.load('encoders/LE_MODEL')
-LE_Manufact = joblib.load('encoders/LE_MANUFACT')
-rf_classifier = joblib.load('model/rf_final8')
+LE_Asset = joblib.load('LE_ASSET')
+LE_ModelNbr = joblib.load('LE_MODEL')
+LE_Manufact = joblib.load('LE_MANUFACT')
+rf_classifier = joblib.load('rf_final5')
 
 existing_manufacturer = LE_Manufact.inverse_transform(range(len(LE_Manufact.classes_)))
 existing_model = LE_ModelNbr.inverse_transform(range(len(LE_ModelNbr.classes_)))
-existing_serial = LE_Serial.inverse_transform(range(len(LE_Serial.classes_)))
 
 
 def confidence(json_text, lines, confs):
@@ -107,7 +105,7 @@ def extract_text_from_image(image_path):
 def gptText(ocrTXT):
     user_message = {
     "role": "user",
-    "content": "from the text find meaningful attributes(Model ,Serial,Manufacturer,Date of installation/Manufacturer,Unit of measurement,Capacity,Eletrical Input KW,Warranty End Date,Refrigerant,Refrigerant Qty) and their values in json format " + "\"" + ocrTXT + " \"",
+    "content": "from the text find meaningful attributes(Barcode,Model ,Serial,Manufacturer,Date of installation/Manufacturer,Unit of mesurement,Capacity,Eletrical Input KW,Warrenty End Date,Refrigerant,Refrigerant Qty) and their values in json format " + "\"" + ocrTXT + " \"",
     }
 
     response = client.chat.completions.create(
@@ -118,33 +116,6 @@ def gptText(ocrTXT):
 
     text = response.choices[0].message.content
     return text
-
-def find_most_similar_serial(variable, original_values):
-    if not original_values.any():
-        return 'UNKNOWN'
-
-    # variable = variable.replace(' ','')
-    if variable and len(variable.split()) > 0:
-        variable = variable
-    else:
-        # Handle the case where variable is empty or has no elements
-        variable = 'UNKNOWN'
-
-    # Calculate similarity using fuzzywuzzy's fuzz.ratio
-    similarities = [fuzz.ratio(variable.upper(), value.upper()) for value in original_values]
-
-    # Find the index of the maximum similarity
-    max_similarity_index = similarities.index(max(similarities))
-
-    if similarities[max_similarity_index] < 0.5:  # Adjust the threshold as needed
-        # If not desirable, return the original value
-        return 'UNKNOWN'
-
-    # Get the most similar value from the original values
-    most_similar_value = original_values[max_similarity_index]
-
-    return most_similar_value
-
 
 
 # Read CSV file and find the most similar value
@@ -181,9 +152,7 @@ def find_most_similar_value(variable, original_values):
 
 
 
-def predicted_AssetType(Serial,Manufact, model):
-    if Serial is None:
-        Serial = 'UNKNOWN'
+def predicted_AssetType(Manufact, model):
     
     if Manufact is None:
         Manufact = 'UNKNOWN'
@@ -195,18 +164,16 @@ def predicted_AssetType(Serial,Manufact, model):
     
     # Create a DataFrame
     X = pd.DataFrame({
-        'SerialNo': [Serial],
         'Manufacturer': [Manufact],
         'ModelNbr': [model]
     })
 
-    special_values = [1234,'NOT SHOWN','SERIAL','NO SERIAL','SERIAL FADED', 'UNKOWN','REFER TO PIC','FADED LABEL','N.A.', 'UNKOWN', 'Unknown', 'NA', 'NULL', 'UNKNOWN', 'TBA', 'N/A', 'NOT VISIBLE', '123TEST', 'UNABLE TO LOCATE', 'NO ID', 'NO ACCESS', 'UNKOWN', 'NaN', 'na', 'AS PER PICS','nan','None']
+    special_values = [1234, 'UNKOWN', 'Unknown', 'NA', 'NULL', 'UNKNOWN', 'TBA', 'N/A', 'NOT VISIBLE', '123TEST', 'UNABLE TO LOCATE', 'NO ID', 'NO ACCESS', 'UNKOWN', 'NaN', 'na', 'AS PER PICS','nan','None']
 
     # Create a copy of the DataFrame to avoid SettingWithCopyWarning
     X_copy = X.copy()
 
     # Replace values using .loc to avoid SettingWithCopyWarning
-    X_copy.loc[:, 'SerialNo'] = X_copy['SerialNo'].replace(special_values, pd.NA)
     X_copy.loc[:, 'Manufacturer'] = X_copy['Manufacturer'].replace(special_values, pd.NA)
     X_copy.loc[:, 'ModelNbr'] = X_copy['ModelNbr'].replace(special_values, pd.NA)
 
@@ -217,13 +184,7 @@ def predicted_AssetType(Serial,Manufact, model):
 
     # X = OE_X.transform(X)
 
-    X['SerialNo'] = X['SerialNo'].str.replace(' ', '')
-
-    try:
-        X['SerialNo'] = LE_Serial.transform(X['SerialNo'])
-    except ValueError:
-        X['SerialNo'] = 27278
-
+    
     try:
         X['Manufacturer'] = LE_Manufact.transform(X['Manufacturer'])
     except ValueError:
@@ -247,7 +208,6 @@ def predicted_AssetType(Serial,Manufact, model):
 def textProcess(txt):
     model_nbr_variations = ['ModelNbr', 'model', 'modelno', 'model no', 'MODEL', 'MODEL NO','Model_No','Model']
     manufacturer_variations = ['Manufacturer', 'manufacturer', 'make','brand','Brand']
-    serial_variations = ['Serial','SERIAL','SERIAL NO','Serial No','Serial NO','Serial Number','Serial No.','SERIAL NO.','SERIAL NUMBER']
 
     # Convert the text to a JSON object
     json_data = {}
@@ -260,23 +220,11 @@ def textProcess(txt):
         pass 
 
     # Extract attributes
-    serial_nbr = None
     model_nbr = None
     manufacturer = None
 
-    serial_matched = 'UNKNOWN'
     model_nbr_matched = 'UNKNOWN'
     manufacturer_matched = 'UNKNOWN'
-
-    for variation in serial_variations:
-        if variation in json_data:
-            serial_nbr = json_data[variation]
-            if serial_nbr is not None:
-                serial_nbr = serial_nbr.upper()
-            serial_matched= find_most_similar_serial(serial_nbr,existing_serial)
-            del json_data[variation]
-            json_data["Serial"]=serial_nbr
-            break
 
     for variation in model_nbr_variations:
         if variation in json_data:
@@ -300,18 +248,19 @@ def textProcess(txt):
             json_data["Manufacturer"] = manufacturer_matched
             break
 
-    return json.dumps(json_data),serial_matched,manufacturer_matched,model_nbr_matched      
+    return json.dumps(json_data),manufacturer_matched,model_nbr_matched      
 
 
 
 def process_image(image_path):
     
-    #extract text, confidence score variables
+    # Open the image using Pillow
+
+    # Now you can use the 'pil_image' in your function
     lines, confs, extracted_text = extract_text_from_image(image_path)
 
-    #meaningful value from extracted text
     extracted_json = gptText(extracted_text)
-    
+
     return extracted_json, lines, confs
 
 if __name__ == "__main__":
@@ -323,20 +272,12 @@ if __name__ == "__main__":
     # this function takes stream , converting it to image and then extracting text 
     result, lines, confs = process_image(image_path)
 
-    print(result)
-
     confidence_score, word_confidences = confidence(result,lines,confs)
-    min_confidence=0
-    if confidence_score:
-        min_confidence = min(confidence_score)
+    min_confidence = min(confidence_score)
 
 
     # this function takes extracted json formatted text and checks for variation of attributes model, manufacturer
-    result2,serial_matched,manufacturer_matched,model_nbr_matched = textProcess(result)
-
-    print(serial_matched)
-    print(manufacturer_matched)
-    print(model_nbr_matched)
+    result2,manufacturer_matched,model_nbr_matched = textProcess(result)
 
     parsed_data=json.loads(result2)
 
@@ -347,7 +288,5 @@ if __name__ == "__main__":
     
     else:
         #finally assetType is predicted
-        parsed_data['AssetType'] = predicted_AssetType(serial_matched,manufacturer_matched,model_nbr_matched)
-    
-    
+        parsed_data['AssetType'] = predicted_AssetType(manufacturer_matched,model_nbr_matched)
     print(parsed_data)
