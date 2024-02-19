@@ -6,8 +6,10 @@ import joblib
 import pandas as pd
 from fuzzywuzzy import fuzz
 
-
+# pytesseract.pytesseract.tesseract_cmd = r'D:\\Tech_Upgrade_Project\\AI\\OCR\\tesseract.exe'
 myconfig = r"--psm 6 --oem 3"
+# api_key = 'sk-bnjndsidjiwjdiwji48uu38u48jjsncjsjn'
+# client = OpenAI(api_key=api_key)
 client = OpenAI()
 
 # loading all globals
@@ -316,8 +318,6 @@ if __name__ == "__main__":
     # this function takes stream , converting it to image and then extracting text 
     result, lines, confs = process_image(image_path)
     word_confidences = confidence(result,lines,confs)
-    print(result)
-    print(word_confidences)
     # this function takes extracted json formatted text and checks for variation of attributes model, manufacturer
     result2,serial_matched,manufacturer_matched,model_nbr_matched = textProcess(result)
 
@@ -328,13 +328,12 @@ if __name__ == "__main__":
     manufacturer_confidence = word_confidences.get(f'"{result["Manufacturer"]}"', 0)
     model_confidence = word_confidences.get(f'"{result["Model"]}"', 0)
 
-    min_confidence = min(serial_confidence, manufacturer_confidence, model_confidence)
-    if(min_confidence < 20):
+    average_confidence = (serial_confidence + manufacturer_confidence + model_confidence) / 3
+
+    if average_confidence < 40:
         parsed_data['AssetType'] = ""
-    
     else:
-        #finally assetType is predicted
-        parsed_data['AssetType'] = predicted_AssetType(serial_matched,manufacturer_matched,model_nbr_matched)
-    
+    # Finally, AssetType is predicted
+        parsed_data['AssetType'] = predicted_AssetType(serial_matched, manufacturer_matched, model_nbr_matched)
     
     print(parsed_data)
